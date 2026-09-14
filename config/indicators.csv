@@ -1,0 +1,65 @@
+﻿id,name_ko,country,category,source,source_id,freq,transform,target_cb,use_as,hawkish_sign,weight,sign_note,review_flag,id_verified
+us_core_pce,근원 PCE 물가,US,inflation,fred,PCEPILFE,M,yoy,FED,policy_input,1,1.5,[inflation] 값 상회 = 긴축 방향,HIGHW,Y
+us_pce,PCE 물가,US,inflation,fred,PCEPI,M,yoy,FED,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,Y
+us_core_cpi,근원 CPI,US,inflation,fred,CPILFESL,M,yoy,FED,policy_input,1,1.3,[inflation] 값 상회 = 긴축 방향,HIGHW,Y
+us_cpi,CPI,US,inflation,fred,CPIAUCSL,M,yoy,FED,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,Y
+us_ppi,PPI 최종수요,US,inflation,fred,PPIFIS,M,yoy,FED,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,Y
+us_umich_inflexp,미시간 1년 기대인플레,US,inflation_exp,fred,MICH,M,level,FED,policy_input,1,1.1,기대인플레 고착은 연준이 가장 민감하게 보는 변수. weight 상향,HIGHW,Y
+us_nfp,비농업고용,US,labor_level,fred,PAYEMS,M,mom_diff,FED,policy_input,1,1.3,[labor_level] 값 상회 = 긴축 방향,HIGHW,Y
+us_ahe,시간당 평균임금,US,labor_level,fred,CES0500000003,M,yoy,FED,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,Y
+us_awh,주당 평균 근로시간,US,labor_level,fred,AWHAETP,M,level,FED,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,Y
+us_jolts,JOLTS 구인건수,US,labor_level,fred,JTSJOL,M,level,FED,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,Y
+us_lfpr,경제활동참가율,US,labor_level,fred,CIVPART,M,level,FED,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,Y
+us_unrate,실업률,US,labor_slack,fred,UNRATE,M,level,FED,policy_input,-1,1.0,[labor_slack] 값 상회 = 완화 방향,SLACK,Y
+us_iclaims,신규 실업수당청구,US,labor_slack,fred,ICSA,W,level_4wma,FED,policy_input,-1,0.6,[labor_slack] 값 상회 = 완화 방향,SLACK,Y
+us_cclaims,연속 실업수당청구,US,labor_slack,fred,CCSA,W,level,FED,policy_input,-1,0.8,[labor_slack] 값 상회 = 완화 방향,SLACK,Y
+us_u6,U-6 광의실업률,US,labor_slack,fred,U6RATE,M,level,FED,policy_input,-1,0.8,[labor_slack] 값 상회 = 완화 방향,SLACK,Y
+us_ism_mfg,ISM 제조업 PMI,US,growth,manual,ISM_MFG_PMI,M,level,FED,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,N
+us_ism_svc,ISM 서비스업 PMI,US,growth,manual,ISM_SVC_PMI,M,level,FED,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,N
+us_retail_ctl,소매판매 control,US,growth,census,MARTS_CTL,M,mom_pct,FED,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,N
+us_durable,내구재 주문,US,growth,fred,DGORDER,M,mom_pct,FED,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,Y
+us_indpro,산업생산,US,growth,fred,INDPRO,M,mom_pct,FED,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,Y
+us_gdp_adv,실질GDP 속보치,US,growth,fred,GDPC1,Q,qoq_saar,FED,policy_input,1,0.7,성장 상회는 긴축 재료이나 분기 후행 발표라 시장 영향은 제한적,,Y
+us_fftr_upper,연준 목표금리 상단,US,policy,fred,DFEDTARU,D,level,FED,outcome,0,0.0,[outcome] 매파 스코어 집계 제외,,Y
+us_effr,실효 연방기금금리,US,policy,fred,EFFR,D,level,FED,outcome,0,0.0,[outcome] 매파 스코어 집계 제외,,Y
+us_2y,미 국채 2년,US,financial,fred,DGS2,D,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
+us_10y,미 국채 10년,US,financial,fred,DGS10,D,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
+us_2s10s,2s10s 스프레드,US,financial,fred,T10Y2Y,D,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
+us_hy_oas,하이일드 OAS,US,financial,fred,BAMLH0A0HYM2,D,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
+us_nfci,시카고연은 금융환경,US,financial,fred,NFCI,W,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
+kr_cpi,한국 CPI,KR,inflation,ecos,901Y009,M,yoy,BOK,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
+kr_core_cpi,한국 근원CPI,KR,inflation,ecos,901Y010,M,yoy,BOK,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
+kr_export,수출(월간),KR,external,ecos,403Y001,M,yoy,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
+kr_export_20d,관세청 1~20일 수출,KR,external,customs,EXPORT_20D,M,yoy,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
+kr_export_semi,반도체 수출,KR,external,customs,EXPORT_SEMI,M,yoy,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
+kr_ip,산업생산,KR,growth,kosis,IP_SA,M,mom_pct,BOK,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,N
+kr_unrate,한국 실업률,KR,labor_slack,ecos,901Y027,M,level,BOK,policy_input,-1,0.8,[labor_slack] 값 상회 = 완화 방향,SLACK,N
+kr_current_acct,경상수지,KR,external,ecos,301Y017,M,level,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
+kr_household_debt,가계신용 증감,KR,credit,ecos,151Y001,Q,yoy,BOK,policy_input,1,0.6,[credit] 값 상회 = 긴축 방향,,N
+kr_house_price,주택매매가격지수,KR,credit,ecos,901Y062,M,mom_pct,BOK,policy_input,1,0.6,[credit] 값 상회 = 긴축 방향,,N
+kr_base_rate,한은 기준금리,KR,policy,ecos,722Y001,D,level,BOK,outcome,0,0.0,[outcome] 매파 스코어 집계 제외,,N
+kr_ktb3y,국고채 3년,KR,financial,ecos,817Y002,D,level,BOK,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+kr_ktb10y,국고채 10년,KR,financial,ecos,817Y002,D,level,BOK,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+ea_hicp,HICP,EA,inflation,ecb,ICP.M.U2.N.000000.4.ANR,M,level,ECB,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
+ea_core_hicp,근원 HICP,EA,inflation,ecb,ICP.M.U2.N.XEF000.4.ANR,M,level,ECB,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
+ea_wages,협상임금,EA,labor_level,ecb,ECB_NEGOTIATED_WAGES,Q,yoy,ECB,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,N
+ea_pmi_comp,유로존 합성 PMI,EA,growth,manual,EA_PMI_COMPOSITE,M,level,ECB,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,N
+de_ifo,독일 IFO 기업환경,EA,sentiment,manual,DE_IFO_BCI,M,level,ECB,policy_input,1,0.5,[sentiment] 값 상회 = 긴축 방향,,N
+ea_unrate,유로존 실업률,EA,labor_slack,ecb,LFSI.M.I9.S.UNEHRT.TOTAL0.15_74.T,M,level,ECB,policy_input,-1,0.8,[labor_slack] 값 상회 = 완화 방향,SLACK,N
+de_bund2y,독일 국채 2년,EA,financial,ecb,YC.B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y,D,level,ECB,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+de_bund10y,독일 국채 10년,EA,financial,ecb,YC.B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y,D,level,ECB,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+jp_cpi_exfresh,전국 CPI(신선식품 제외),JP,inflation,estat,JP_CPI_COREA,M,yoy,BOJ,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
+jp_tokyo_cpi,도쿄 CPI(신선식품 제외),JP,inflation,estat,JP_TOKYO_CORE,M,yoy,BOJ,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
+jp_tankan,단칸 대기업제조업 DI,JP,sentiment,boj,TANKAN_LMFG_DI,Q,level,BOJ,policy_input,1,0.5,[sentiment] 값 상회 = 긴축 방향,,N
+jp_real_wage,실질임금,JP,labor_level,mhlw,JP_REAL_WAGE,M,yoy,BOJ,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,N
+jp_shunto,춘투 임금인상률,JP,labor_level,manual,JP_SHUNTO,A,level,BOJ,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,N
+jp_jgb10y,JGB 10년,JP,financial,mof,JGB_10Y,D,level,BOJ,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+jp_policy_rate,무담보콜 O/N 유도목표,JP,policy,boj,BOJ_POLICY,D,level,BOJ,outcome,0,0.0,[outcome] 매파 스코어 집계 제외,,N
+bdi,발틱운임지수,GL,commodity,scrape,BDI,D,log_chg,NONE,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+scfi,상하이운임지수,GL,commodity,scrape,SCFI,W,log_chg,NONE,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+oil_wti,WTI 유가,GL,commodity,fred,DCOILWTICO,D,log_chg,FED,policy_input,1,0.3,헤드라인만 자극. 연준 타깃은 근원이라 영향 약함 -> weight 0.3,,Y
+copper,구리 가격,GL,commodity,fred,PCOPPUSDM,M,log_chg,NONE,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,Y
+gold,금 가격,GL,commodity,scrape,XAUUSD,D,log_chg,NONE,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,N
+dxy,달러인덱스,GL,financial,fred,DTWEXBGS,D,log_chg,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
+usdkrw,원달러 환율,GL,financial,fred,DEXKOUS,D,log_chg,BOK,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,Y
+usdjpy,엔달러 환율,GL,financial,fred,DEXJPUS,D,log_chg,BOJ,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,Y
