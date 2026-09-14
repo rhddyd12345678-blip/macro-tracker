@@ -17,6 +17,9 @@
   h2 { font-size: 1.05rem; margin-bottom: 8px; }
   .chart-block { margin-bottom: 48px; }
   canvas { max-width: 100%; }
+  section + section { margin-top: 56px; padding-top: 8px; border-top: 1px solid #eee; }
+  #krLinkSummary { font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; }
+  #krLinkSummary div { padding: 2px 0; }
   footer {
     margin-top: 40px;
     font-size: 0.85rem;
@@ -31,17 +34,39 @@
   <h1>US 정책금리 &amp; 국채금리</h1>
   <div id="error"></div>
 
-  <div class="chart-block">
-    <h2>정책금리 (FFTR 상단 vs EFFR)</h2>
-    <canvas id="policyRateChart" height="120"></canvas>
-  </div>
+  <section>
+    <div class="chart-block">
+      <h2>정책금리 (FFTR 상단 vs EFFR)</h2>
+      <canvas id="policyRateChart" height="120"></canvas>
+    </div>
 
-  <div class="chart-block">
-    <h2>국채금리 (2Y vs 10Y)</h2>
-    <canvas id="yieldChart" height="120"></canvas>
-  </div>
+    <div class="chart-block">
+      <h2>국채금리 (2Y vs 10Y)</h2>
+      <canvas id="yieldChart" height="120"></canvas>
+    </div>
+  </section>
 
-  <footer>2주차에 KR/EA/JP 추가 예정.</footer>
+  <section>
+    <h1>한국 금리 링크 분석 (국고채 3Y)</h1>
+    <div id="krLinkSummary"></div>
+
+    <div class="chart-block">
+      <h2>롤링 베타 (60일 / 120일)</h2>
+      <canvas id="krBetaChart" height="120"></canvas>
+    </div>
+
+    <div class="chart-block">
+      <h2>롤링 상관계수 (60일 / 120일)</h2>
+      <canvas id="krCorrChart" height="120"></canvas>
+    </div>
+
+    <div class="chart-block">
+      <h2>리드-래그 상관계수 (양수 = 미국이 며칠 선행)</h2>
+      <canvas id="krLeadLagChart" height="120"></canvas>
+    </div>
+  </section>
+
+  <footer>Bund2Y/JGB10Y는 id_verified 확보 후 회귀에 추가 예정. 정책금리/국채금리 패널은 아직 US만 표시.</footer>
 
   <script>
     function renderChart(canvasId, seriesMap, labelMap) {
@@ -72,6 +97,73 @@
       });
     }
 
+    function renderRollingChart(canvasId, rollingByWindow, fieldPrefix, regressors) {
+      const windows = Object.keys(rollingByWindow);
+      const labels = rollingByWindow[windows[0]].map((r) => r.date);
+      const datasets = [];
+      windows.forEach((win) => {
+        const rows = rollingByWindow[win];
+        regressors.forEach((reg) => {
+          datasets.push({
+            label: `${reg.label} (${win})`,
+            data: rows.map((r) => r[`${fieldPrefix}_${reg.id}`]),
+            borderWidth: 1.5,
+            pointRadius: 0,
+          });
+        });
+      });
+
+      new Chart(document.getElementById(canvasId), {
+        type: "line",
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          interaction: { mode: "index", intersect: false },
+          scales: { x: { ticks: { maxTicksLimit: 12 } } },
+        },
+      });
+    }
+
+    function renderLeadLagChart(canvasId, leadLag) {
+      const entries = Object.entries(leadLag);
+      const lags = entries[0][1].rows.map((r) => r.lag);
+      const datasets = entries.map(([id, obj]) => ({
+        label: obj.label,
+        data: obj.rows.map((r) => r.corr),
+        borderWidth: 1.5,
+        pointRadius: 2,
+      }));
+
+      new Chart(document.getElementById(canvasId), {
+        type: "line",
+        data: { labels: lags, datasets },
+        options: {
+          responsive: true,
+          scales: { x: { title: { display: true, text: "lag (일)" } } },
+        },
+      });
+    }
+
+    function renderKrLinkSummary(krLink) {
+      const el = document.getElementById("krLinkSummary");
+      if (krLink.error) {
+        el.textContent = "분석 실패: " + krLink.error;
+        return;
+      }
+      const lines = [
+        `표본: ${krLink.sample.start} ~ ${krLink.sample.end} (${krLink.sample.n}일)`,
+      ];
+      Object.values(krLink.lead_lag).forEach((obj) => {
+        if (obj.best) {
+          const dir = obj.best.lag > 0 ? "미국 선행" : obj.best.lag < 0 ? "한국 선행" : "동시";
+          lines.push(
+            `${obj.label}: 최적 lag ${obj.best.lag}일 (${dir}), 상관계수 ${obj.best.corr.toFixed(3)}`
+          );
+        }
+      });
+      el.innerHTML = lines.map((l) => `<div>${l}</div>`).join("");
+    }
+
     fetch("data.json")
       .then((r) => r.json())
       .then((data) => {
@@ -83,6 +175,14 @@
           us_2y: "2Y",
           us_10y: "10Y",
         });
+
+        const krLink = data.kr_link;
+        renderKrLinkSummary(krLink);
+        if (!krLink.error) {
+          renderRollingChart("krBetaChart", krLink.rolling, "beta", krLink.regressors);
+          renderRollingChart("krCorrChart", krLink.rolling, "corr", krLink.regressors);
+          renderLeadLagChart("krLeadLagChart", krLink.lead_lag);
+        }
       })
       .catch((err) => {
         document.getElementById("error").textContent = "data.json 로드 실패: " + err;

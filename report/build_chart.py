@@ -1,8 +1,12 @@
 import json
 import sqlite3
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "etl"))
+from analysis import run_kr_link_analysis
+
 DB_PATH = ROOT / "data" / "macro.db"
 OUT_JSON = Path(__file__).resolve().parent / "data.json"
 
@@ -29,6 +33,7 @@ def main():
     data = {
         "policy_rate": {sid: load_series(conn, sid) for sid in POLICY_SERIES},
         "yields": {sid: load_series(conn, sid) for sid in YIELD_SERIES},
+        "kr_link": run_kr_link_analysis(conn),
     }
     conn.close()
 
