@@ -105,6 +105,35 @@
     </div>
   </section>
 
+  <section>
+    <h1>FOMC 4사분면 예측 스코어보드</h1>
+    <p id="nextMeeting" style="font-size:0.95rem;font-weight:600;margin-top:-4px"></p>
+
+    <div class="chart-block">
+      <h2>누적 Brier: 나 vs 시장</h2>
+      <div id="cumulativeBrier" style="font-size:0.9rem;line-height:1.6"></div>
+    </div>
+
+    <div class="chart-block">
+      <h2>예측 기록</h2>
+      <table id="forecastTable">
+        <thead>
+          <tr>
+            <th>회의일</th><th>예측일</th><th>hike_hawk</th><th>hike_dove</th><th>hold</th>
+            <th>cut_hawk</th><th>cut_dove</th><th>실제</th><th>내 Brier</th><th>근거</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="chart-block">
+      <h2>캘리브레이션 곡선</h2>
+      <canvas id="calibrationChart" height="120"></canvas>
+      <div id="calibrationPlaceholder" class="placeholder" hidden></div>
+    </div>
+  </section>
+
   <footer>Bund2Y/JGB10Y는 id_verified 확보 후 회귀에 추가 예정. 정책금리/국채금리 패널은 아직 US만 표시.</footer>
 
   <script>
@@ -280,6 +309,101 @@
       });
     }
 
+    const STATE_LABELS = {
+      hike_hawk: "매파적 인상", hike_dove: "비둘기적 인상", hold: "동결",
+      cut_hawk: "매파적 인하", cut_dove: "비둘기적 인하",
+    };
+
+    function renderNextMeeting(nm) {
+      const el = document.getElementById("nextMeeting");
+      if (!nm) {
+        el.textContent = "다음 FOMC 일정 없음 (config/fomc_calendar.csv 갱신 필요)";
+        return;
+      }
+      const sep = nm.has_sep ? " (SEP 포함)" : "";
+      el.textContent = `다음 FOMC: ${nm.meeting_date}${sep} - D-${nm.days_until}`;
+    }
+
+    function renderCumulativeBrier(cum) {
+      const el = document.getElementById("cumulativeBrier");
+      if (cum.n_scored === 0) {
+        el.textContent = `아직 채점된 예측 없음 (등록 ${cum.n_total}건, 회의가 지나고 데이터가 들어오면 자동 채점됨)`;
+        return;
+      }
+      const lines = [
+        `채점 완료 ${cum.n_scored}건 / 등록 ${cum.n_total}건`,
+        `내 평균 Brier: ${fmt(cum.my_avg_brier, 3)}`,
+        `시장 평균 Brier: ${cum.market_avg_brier === null ? "데이터 없음" : fmt(cum.market_avg_brier, 3)}`,
+      ];
+      if (cum.market_avg_brier !== null) {
+        const diff = cum.my_avg_brier - cum.market_avg_brier;
+        lines.push(diff < 0 ? `내가 시장보다 ${fmt(-diff, 3)} 더 정확함` : `시장이 나보다 ${fmt(diff, 3)} 더 정확함`);
+      }
+      el.innerHTML = lines.map((l) => `<div>${l}</div>`).join("");
+    }
+
+    function renderForecastTable(forecasts) {
+      const tbody = document.querySelector("#forecastTable tbody");
+      if (!forecasts.length) {
+        tbody.innerHTML = '<tr><td colspan="10" class="placeholder">등록된 예측 없음 - etl/forecast.py로 입력</td></tr>';
+        return;
+      }
+      tbody.innerHTML = forecasts.map((f) => `
+        <tr>
+          <td>${f.meeting_date}</td>
+          <td>${f.forecast_date}</td>
+          <td>${fmt(f.probs.hike_hawk, 0)}%</td>
+          <td>${fmt(f.probs.hike_dove, 0)}%</td>
+          <td>${fmt(f.probs.hold, 0)}%</td>
+          <td>${fmt(f.probs.cut_hawk, 0)}%</td>
+          <td>${fmt(f.probs.cut_dove, 0)}%</td>
+          <td>${f.actual_state ? STATE_LABELS[f.actual_state] : '<span class="badge badge-pending">대기중</span>'}</td>
+          <td>${fmt(f.brier_score, 3)}</td>
+          <td>${f.rationale || "-"}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderCalibrationChart(cal) {
+      const canvas = document.getElementById("calibrationChart");
+      const placeholder = document.getElementById("calibrationPlaceholder");
+      if (!cal.ready) {
+        canvas.hidden = true;
+        placeholder.hidden = false;
+        placeholder.textContent = `표본 부족 (${cal.n}/${cal.min_n}) - 예측이 더 쌓이고 채점되면 자동으로 곡선이 나타남`;
+        return;
+      }
+      canvas.hidden = false;
+      placeholder.hidden = true;
+      new Chart(canvas, {
+        type: "scatter",
+        data: {
+          datasets: [
+            {
+              label: "완벽한 캘리브레이션",
+              data: [{ x: 0, y: 0 }, { x: 100, y: 100 }],
+              type: "line",
+              borderDash: [4, 4],
+              borderColor: "#ccc",
+              pointRadius: 0,
+            },
+            {
+              label: "실제",
+              data: cal.buckets.map((b) => ({ x: b.predicted_mid, y: b.observed_freq })),
+              backgroundColor: "#1a56c4",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: "예측 확률(%)" }, min: 0, max: 100 },
+            y: { title: { display: true, text: "실제 적중 빈도(%)" }, min: 0, max: 100 },
+          },
+        },
+      });
+    }
+
     fetch("data.json")
       .then((r) => r.json())
       .then((data) => {
@@ -302,6 +426,12 @@
 
         renderCurrentWeek(data.current_week);
         renderHawkishChart(data.hawkish);
+
+        const scoreboard = data.fomc_scoreboard;
+        renderNextMeeting(scoreboard.next_meeting);
+        renderCumulativeBrier(scoreboard.cumulative);
+        renderForecastTable(scoreboard.forecasts);
+        renderCalibrationChart(scoreboard.calibration);
       })
       .catch((err) => {
         document.getElementById("error").textContent = "data.json 로드 실패: " + err;

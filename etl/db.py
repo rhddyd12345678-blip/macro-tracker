@@ -40,6 +40,49 @@ CREATE TABLE IF NOT EXISTS observations (
 );
 """
 
+# key_indicators/position_plan은 SQLite에 배열/JSONB 타입이 없어 TEXT에 JSON
+# 문자열로 저장한다 (forecast.py가 json.dumps/json.loads로 처리).
+# actual_state/brier_score는 입력 시점엔 NULL - score_forecasts.py가 회의 이후
+# FRED 데이터가 들어오면 채운다.
+FORECAST_SCHEMA = """
+CREATE TABLE IF NOT EXISTS forecasts (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    meeting_date   TEXT NOT NULL,
+    forecast_date  TEXT NOT NULL,
+    q_hike_hawk    REAL NOT NULL,
+    q_hike_dove    REAL NOT NULL,
+    q_hold         REAL NOT NULL,
+    q_cut_hawk     REAL NOT NULL,
+    q_cut_dove     REAL NOT NULL,
+    hold_tone      INTEGER,
+    rationale      TEXT,
+    key_indicators TEXT,
+    position_plan  TEXT,
+    actual_state   TEXT,
+    brier_score    REAL
+);
+"""
+
+# market_baseline: OIS 등 시장 내재확률. 현재는 무료 수집 소스가 없어 빈 테이블로
+# 시작 - score_forecasts.py는 데이터가 없으면 "시장 비교 없음"으로 건너뛴다.
+MARKET_BASELINE_SCHEMA = """
+CREATE TABLE IF NOT EXISTS market_baseline (
+    meeting_date      TEXT NOT NULL,
+    snapshot_date     TEXT NOT NULL,
+    hike_prob         REAL,
+    hold_prob         REAL,
+    cut_prob          REAL,
+    p_hike_hawk       REAL,
+    p_hike_dove       REAL,
+    p_cut_hawk        REAL,
+    p_cut_dove        REAL,
+    ust2y             REAL,
+    implied_hawkish_z REAL,
+    brier_score       REAL,
+    PRIMARY KEY (meeting_date, snapshot_date)
+);
+"""
+
 
 def _ensure_columns(conn, table, columns):
     """(name, decl) 목록 중 테이블에 없는 컬럼만 ALTER TABLE로 추가. 기존 커밋된
@@ -55,6 +98,8 @@ def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.execute(SCHEMA)
     conn.execute(OBS_SCHEMA)
+    conn.execute(FORECAST_SCHEMA)
+    conn.execute(MARKET_BASELINE_SCHEMA)
     _ensure_columns(conn, "observations", [
         ("surprise", "REAL"),
         ("z_method", "TEXT"),
@@ -137,5 +182,77 @@ def update_surprise(conn, indicator_id, ref_period, vintage_date,
         WHERE indicator_id = ? AND ref_period = ? AND vintage_date = ?
         """,
         (surprise, surprise_z, z_method, z_sample_n, indicator_id, ref_period, vintage_date),
+    )
+    conn.commit()
+
+
+FORECAST_COLUMNS = [
+    "id", "meeting_date", "forecast_date",
+    "q_hike_hawk", "q_hike_dove", "q_hold", "q_cut_hawk", "q_cut_dove",
+    "hold_tone", "rationale", "key_indicators", "position_plan",
+    "actual_state", "brier_score",
+]
+
+
+def insert_forecast(conn, row):
+    """row: dict (id, actual_state, brier_score 없이). 삽입된 forecast의 id 반환."""
+    cur = conn.execute(
+        """
+        INSERT INTO forecasts
+            (meeting_date, forecast_date, q_hike_hawk, q_hike_dove, q_hold,
+             q_cut_hawk, q_cut_dove, hold_tone, rationale, key_indicators, position_plan)
+        VALUES (:meeting_date, :forecast_date, :q_hike_hawk, :q_hike_dove, :q_hold,
+                :q_cut_hawk, :q_cut_dove, :hold_tone, :rationale, :key_indicators, :position_plan)
+        """,
+        row,
+    )
+    conn.commit()
+    return cur.lastrowid
+
+
+def get_forecasts(conn):
+    cur = conn.execute(
+        f"SELECT {', '.join(FORECAST_COLUMNS)} FROM forecasts ORDER BY meeting_date"
+    )
+    return [dict(zip(FORECAST_COLUMNS, row)) for row in cur.fetchall()]
+
+
+def get_unscored_forecasts(conn):
+    cur = conn.execute(
+        f"SELECT {', '.join(FORECAST_COLUMNS)} FROM forecasts "
+        f"WHERE actual_state IS NULL ORDER BY meeting_date"
+    )
+    return [dict(zip(FORECAST_COLUMNS, row)) for row in cur.fetchall()]
+
+
+def update_forecast_score(conn, forecast_id, actual_state, brier_score):
+    conn.execute(
+        "UPDATE forecasts SET actual_state = ?, brier_score = ? WHERE id = ?",
+        (actual_state, brier_score, forecast_id),
+    )
+    conn.commit()
+
+
+MARKET_BASELINE_COLUMNS = [
+    "meeting_date", "snapshot_date", "hike_prob", "hold_prob", "cut_prob",
+    "p_hike_hawk", "p_hike_dove", "p_cut_hawk", "p_cut_dove",
+    "ust2y", "implied_hawkish_z", "brier_score",
+]
+
+
+def get_market_baseline(conn, meeting_date):
+    """meeting_date의 모든 스냅샷(발표 전 궤적)을 snapshot_date순으로."""
+    cur = conn.execute(
+        f"SELECT {', '.join(MARKET_BASELINE_COLUMNS)} FROM market_baseline "
+        f"WHERE meeting_date = ? ORDER BY snapshot_date",
+        (meeting_date,),
+    )
+    return [dict(zip(MARKET_BASELINE_COLUMNS, row)) for row in cur.fetchall()]
+
+
+def update_market_baseline_score(conn, meeting_date, snapshot_date, brier_score):
+    conn.execute(
+        "UPDATE market_baseline SET brier_score = ? WHERE meeting_date = ? AND snapshot_date = ?",
+        (brier_score, meeting_date, snapshot_date),
     )
     conn.commit()

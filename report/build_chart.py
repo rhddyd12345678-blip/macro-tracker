@@ -7,6 +7,7 @@ sys.path.insert(0, str(ROOT / "etl"))
 from analysis import run_kr_link_analysis
 from compute import compute_current_week_releases, compute_hawkish_series
 from db import get_connection
+from score_forecasts import build_scoreboard
 
 OUT_JSON = Path(__file__).resolve().parent / "data.json"
 
@@ -36,6 +37,7 @@ def main():
         "kr_link": run_kr_link_analysis(conn),
         "hawkish": compute_hawkish_series(conn),
         "current_week": compute_current_week_releases(conn),
+        "fomc_scoreboard": build_scoreboard(conn),
     }
     conn.close()
 

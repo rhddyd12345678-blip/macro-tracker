@@ -41494,5 +41494,26 @@
         "contribution": null
       }
     ]
+  },
+  "fomc_scoreboard": {
+    "forecasts": [],
+    "cumulative": {
+      "my_avg_brier": null,
+      "market_avg_brier": null,
+      "n_scored": 0,
+      "n_total": 0
+    },
+    "calibration": {
+      "ready": false,
+      "n": 0,
+      "min_n": 30,
+      "buckets": []
+    },
+    "next_meeting": {
+      "meeting_date": "2026-09-16",
+      "has_sep": true,
+      "days_until": 2
+    },
+    "note": "market_baseline은 아직 무료 수집 소스가 없어 비어있음 - 값이 채워지면 자동으로 나 vs 시장 비교에 반영됨. 캘리브레이션 곡선은 표본이 30개(예측 6건) 미만이면 표시 안 함."
   }
 }
