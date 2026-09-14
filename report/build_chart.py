@@ -1,13 +1,13 @@
 import json
-import sqlite3
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "etl"))
 from analysis import run_kr_link_analysis
+from compute import compute_current_week_releases, compute_hawkish_series
+from db import get_connection
 
-DB_PATH = ROOT / "data" / "macro.db"
 OUT_JSON = Path(__file__).resolve().parent / "data.json"
 
 LOOKBACK_YEARS = 5
@@ -29,11 +29,13 @@ def load_series(conn, series_id):
 
 
 def main():
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     data = {
         "policy_rate": {sid: load_series(conn, sid) for sid in POLICY_SERIES},
         "yields": {sid: load_series(conn, sid) for sid in YIELD_SERIES},
         "kr_link": run_kr_link_analysis(conn),
+        "hawkish": compute_hawkish_series(conn),
+        "current_week": compute_current_week_releases(conn),
     }
     conn.close()
 

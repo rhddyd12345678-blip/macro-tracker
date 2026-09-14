@@ -202,7 +202,6 @@ def main():
                 "actual_source": actual_source,
                 "consensus": consensus,
                 "previous": previous,
-                "surprise_z": None,
             })
 
             logger.info(

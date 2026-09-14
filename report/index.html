@@ -20,6 +20,15 @@
   section + section { margin-top: 56px; padding-top: 8px; border-top: 1px solid #eee; }
   #krLinkSummary { font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; }
   #krLinkSummary div { padding: 2px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 8px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; }
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.75rem; white-space: nowrap; }
+  .badge-pending { background: #eee; color: #666; }
+  .badge-released { background: #e6f4ea; color: #1a7f37; }
+  .badge-raw { background: #fff3cd; color: #8a6d00; }
+  .badge-zscore { background: #e6f0ff; color: #1a56c4; }
+  .placeholder { color: #888; font-style: italic; padding: 16px 0; }
+  [hidden] { display: none; }
   footer {
     margin-top: 40px;
     font-size: 0.85rem;
@@ -67,6 +76,32 @@
     <div class="chart-block">
       <h2>리드-래그 상관계수 (양수 = 미국이 며칠 선행)</h2>
       <canvas id="krLeadLagChart" height="120"></canvas>
+    </div>
+  </section>
+
+  <section>
+    <h1>매파 스코어 (FED policy_input)</h1>
+    <p style="font-size:0.85rem;color:#666;margin-top:-4px">
+      target_cb=FED 且 use_as=policy_input 지표만 집계. 컨센서스+실측치가 쌓일수록 자동으로 채워짐.
+    </p>
+
+    <div class="chart-block">
+      <h2>이번 주 발표 현황 (<span id="weekRange"></span>)</h2>
+      <table id="currentWeekTable">
+        <thead>
+          <tr>
+            <th>지표</th><th>상태</th><th>실측치</th><th>컨센서스</th><th>이전치</th>
+            <th>surprise_z</th><th>기여도</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="chart-block">
+      <h2>주간 매파 스코어 시계열</h2>
+      <canvas id="hawkishChart" height="120"></canvas>
+      <div id="hawkishPlaceholder" class="placeholder" hidden></div>
     </div>
   </section>
 
@@ -174,6 +209,77 @@
       el.innerHTML = lines.map((l) => `<div>${l}</div>`).join("");
     }
 
+    function statusBadge(status) {
+      return status === "released"
+        ? '<span class="badge badge-released">발표됨</span>'
+        : '<span class="badge badge-pending">대기중</span>';
+    }
+
+    function methodBadge(method, n) {
+      if (!method) return "-";
+      const cls = method === "zscore" ? "badge-zscore" : "badge-raw";
+      const label = method === "zscore" ? `z-score (n=${n})` : `raw (n=${n}, 표본부족)`;
+      return `<span class="badge ${cls}">${label}</span>`;
+    }
+
+    function fmt(v, digits = 2) {
+      return v === null || v === undefined ? "-" : Number(v).toFixed(digits);
+    }
+
+    function renderCurrentWeek(week) {
+      document.getElementById("weekRange").textContent =
+        week.week_start && week.week_end ? `${week.week_start} ~ ${week.week_end}` : "-";
+
+      const tbody = document.querySelector("#currentWeekTable tbody");
+      if (!week.rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="placeholder">이번 주 예정된 발표 없음</td></tr>';
+        return;
+      }
+      tbody.innerHTML = week.rows.map((r) => `
+        <tr>
+          <td>${r.label}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td>${fmt(r.actual)}</td>
+          <td>${fmt(r.consensus)}</td>
+          <td>${fmt(r.previous)}</td>
+          <td>${r.status === "released" ? methodBadge(r.z_method, r.z_sample_n) + " " + fmt(r.surprise_z, 3) : "-"}</td>
+          <td>${fmt(r.contribution, 3)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderHawkishChart(hawkish) {
+      const canvas = document.getElementById("hawkishChart");
+      const placeholder = document.getElementById("hawkishPlaceholder");
+      if (!hawkish.series.length) {
+        canvas.hidden = true;
+        placeholder.hidden = false;
+        placeholder.textContent =
+          `아직 매파 스코어를 계산할 만큼 데이터가 쌓이지 않음 ` +
+          `(집계 대상 ${hawkish.universe_size}개 지표, 발표 완료 0주 - 표본 부족). ` +
+          `컨센서스+실측치가 쌓이면 자동으로 채워짐.`;
+        return;
+      }
+      canvas.hidden = false;
+      placeholder.hidden = true;
+      new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: hawkish.series.map((w) => w.week_start),
+          datasets: [{
+            label: "매파 스코어",
+            data: hawkish.series.map((w) => w.score),
+            borderWidth: 1.5,
+            pointRadius: 2,
+          }],
+        },
+        options: {
+          responsive: true,
+          scales: { x: { ticks: { maxTicksLimit: 12 } } },
+        },
+      });
+    }
+
     fetch("data.json")
       .then((r) => r.json())
       .then((data) => {
@@ -193,6 +299,9 @@
           renderRollingChart("krCorrChart", krLink.rolling, "corr", krLink.regressors, [-1, 1]);
           renderLeadLagChart("krLeadLagChart", krLink.lead_lag);
         }
+
+        renderCurrentWeek(data.current_week);
+        renderHawkishChart(data.hawkish);
       })
       .catch((err) => {
         document.getElementById("error").textContent = "data.json 로드 실패: " + err;

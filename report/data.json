@@ -41451,5 +41451,48 @@
       }
     },
     "note": "Bund2Y/JGB10Y는 id_verified=Y 확보 전까지 제외. REGRESSORS 리스트에 추가하면 자동으로 회귀에 포함됨."
+  },
+  "hawkish": {
+    "universe_size": 22,
+    "series": [],
+    "note": "target_cb=FED 且 use_as=policy_input만 집계. 발표(actual+consensus 확보)가 없는 주는 시계열에서 제외 (0점으로 채우면 '중립'과 '데이터 없음'이 구분 안 됨). z_method='raw'인 값은 표본 부족으로 surprise_z 대신 raw surprise를 그대로 쓴 것 - 참고용으로만 볼 것."
+  },
+  "current_week": {
+    "week_start": "2026-09-14",
+    "week_end": "2026-09-20",
+    "rows": [
+      {
+        "indicator_id": "us_iclaims",
+        "label": "신규 실업수당청구",
+        "release_ts": "2026-09-17T08:30:00-04:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 209000.0,
+        "previous": 206000.0,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": -1,
+        "weight": 0.6,
+        "contribution": null
+      },
+      {
+        "indicator_id": "us_indpro",
+        "label": "산업생산",
+        "release_ts": "2026-09-18T09:15:00-04:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 0.1,
+        "previous": 0.2,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": 1,
+        "weight": 0.7,
+        "contribution": null
+      }
+    ]
   }
 }

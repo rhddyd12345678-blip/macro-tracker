@@ -40,6 +40,11 @@ jobs:
         continue-on-error: true
         run: python etl/fetch_calendar.py
 
+      - name: Compute surprise_z and hawkish score
+        id: compute
+        continue-on-error: true
+        run: python etl/compute.py
+
       - name: Rebuild chart data
         run: python report/build_chart.py
 
@@ -59,7 +64,8 @@ jobs:
         if: |
           steps.fred.outcome == 'failure' ||
           steps.ecos.outcome == 'failure' ||
-          steps.calendar.outcome == 'failure'
+          steps.calendar.outcome == 'failure' ||
+          steps.compute.outcome == 'failure'
         run: |
           echo "하나 이상의 수집기가 완전히 실패했습니다 (개별 지표 실패가 아니라 전체 실패). 로그를 확인하세요."
           exit 1
