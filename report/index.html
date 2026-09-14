@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>매크로 트래커 — US 정책금리 &amp; 국채금리</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 960px;
+    margin: 40px auto;
+    padding: 0 16px;
+    color: #1a1a1a;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  h2 { font-size: 1.05rem; margin-bottom: 8px; }
+  .chart-block { margin-bottom: 48px; }
+  canvas { max-width: 100%; }
+  footer {
+    margin-top: 40px;
+    font-size: 0.85rem;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 16px;
+  }
+  #error { color: #b00020; }
+</style>
+</head>
+<body>
+  <h1>US 정책금리 &amp; 국채금리</h1>
+  <div id="error"></div>
+
+  <div class="chart-block">
+    <h2>정책금리 (FFTR 상단 vs EFFR)</h2>
+    <canvas id="policyRateChart" height="120"></canvas>
+  </div>
+
+  <div class="chart-block">
+    <h2>국채금리 (2Y vs 10Y)</h2>
+    <canvas id="yieldChart" height="120"></canvas>
+  </div>
+
+  <footer>2주차에 KR/EA/JP 추가 예정.</footer>
+
+  <script>
+    function renderChart(canvasId, seriesMap, labelMap) {
+      const seriesIds = Object.keys(seriesMap);
+      const labelSet = new Set();
+      seriesIds.forEach((id) => seriesMap[id].forEach((p) => labelSet.add(p.date)));
+      const labels = Array.from(labelSet).sort();
+
+      const datasets = seriesIds.map((id) => {
+        const byDate = Object.fromEntries(seriesMap[id].map((p) => [p.date, p.value]));
+        return {
+          label: labelMap[id] || id,
+          data: labels.map((d) => (d in byDate ? byDate[d] : null)),
+          spanGaps: true,
+          borderWidth: 1.5,
+          pointRadius: 0,
+        };
+      });
+
+      new Chart(document.getElementById(canvasId), {
+        type: "line",
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          interaction: { mode: "index", intersect: false },
+          scales: { x: { ticks: { maxTicksLimit: 12 } } },
+        },
+      });
+    }
+
+    fetch("data.json")
+      .then((r) => r.json())
+      .then((data) => {
+        renderChart("policyRateChart", data.policy_rate, {
+          us_fftr_upper: "FFTR 상단",
+          us_effr: "EFFR",
+        });
+        renderChart("yieldChart", data.yields, {
+          us_2y: "2Y",
+          us_10y: "10Y",
+        });
+      })
+      .catch((err) => {
+        document.getElementById("error").textContent = "data.json 로드 실패: " + err;
+      });
+  </script>
+</body>
+</html>
