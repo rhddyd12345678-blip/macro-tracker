@@ -51,7 +51,11 @@
     <div id="krLinkSummary"></div>
 
     <div class="chart-block">
-      <h2>롤링 베타 (60일 / 120일)</h2>
+      <h2>롤링 표준화 베타 (60일 / 120일)</h2>
+      <p style="font-size:0.85rem;color:#666;margin:-4px 0 8px">
+        regressor가 1 SD 움직일 때 국고3Y가 몇 SD 움직이는지 (z-score 회귀). bp/%p/log_chg
+        단위가 달라도 이 스케일로는 서로 비교 가능.
+      </p>
       <canvas id="krBetaChart" height="120"></canvas>
     </div>
 
@@ -97,7 +101,7 @@
       });
     }
 
-    function renderRollingChart(canvasId, rollingByWindow, fieldPrefix, regressors) {
+    function renderRollingChart(canvasId, rollingByWindow, fieldPrefix, regressors, yRange) {
       const windows = Object.keys(rollingByWindow);
       const labels = rollingByWindow[windows[0]].map((r) => r.date);
       const datasets = [];
@@ -113,13 +117,19 @@
         });
       });
 
+      const yScale = { ticks: {} };
+      if (yRange) {
+        yScale.suggestedMin = yRange[0];
+        yScale.suggestedMax = yRange[1];
+      }
+
       new Chart(document.getElementById(canvasId), {
         type: "line",
         data: { labels, datasets },
         options: {
           responsive: true,
           interaction: { mode: "index", intersect: false },
-          scales: { x: { ticks: { maxTicksLimit: 12 } } },
+          scales: { x: { ticks: { maxTicksLimit: 12 } }, y: yScale },
         },
       });
     }
@@ -179,8 +189,8 @@
         const krLink = data.kr_link;
         renderKrLinkSummary(krLink);
         if (!krLink.error) {
-          renderRollingChart("krBetaChart", krLink.rolling, "beta", krLink.regressors);
-          renderRollingChart("krCorrChart", krLink.rolling, "corr", krLink.regressors);
+          renderRollingChart("krBetaChart", krLink.rolling, "std_beta", krLink.regressors, [-1, 1]);
+          renderRollingChart("krCorrChart", krLink.rolling, "corr", krLink.regressors, [-1, 1]);
           renderLeadLagChart("krLeadLagChart", krLink.lead_lag);
         }
       })

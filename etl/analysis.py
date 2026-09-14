@@ -10,6 +10,13 @@ Bund2Y/JGB10Y는 아직 id_verified=N이라 REGRESSORS에서 뺐다. 데이터�
 각 시리즈는 kind에 따라 Δ를 다르게 계산한다:
   - "rate_bp"   : (오늘값 - 어제값) * 100  (금리, 퍼센트 포인트 -> bp)
   - "fx_logret" : log(오늘값/어제값) * 100 (환율, 로그수익률 %)
+
+베타는 원 단위(bp vs log_chg %)로 회귀하면 스케일이 안 맞아 서로 비교가
+안 된다 (예: USDKRW의 하루 변동폭이 UST2Y의 bp 변동폭보다 훨씬 작아서
+계수가 비정상적으로 커 보임). 그래서 롤링 윈도우마다 y와 모든 x를
+z-score로 표준화한 뒤 회귀해 "표준화 베타"를 낸다 — 임의의 환산 계수 없이
+어떤 단위의 regressor가 추가돼도(Bund2Y, JGB10Y, 나중에 다른 지표까지)
+항상 "1 SD 움직임당 몇 SD"로 동일하게 비교 가능하다.
 """
 import sqlite3
 import sys
@@ -117,11 +124,32 @@ def rolling_regression(diff_dates, y, x_arrays, window):
     for i in range(window, n + 1):
         sl = slice(i - window, i)
         y_win = y[sl]
-        X_win = np.column_stack([np.ones(window)] + [x_arrays[k][sl] for k in keys])
-        coef, r_squared = ols_with_r2(X_win, y_win)
+
+        y_std = np.std(y_win)
+        if y_std == 0:
+            continue  # 무변동 구간 - 표준화 불가, 이 날짜는 건너뜀
+
+        x_win_z = {}
+        skip = False
+        for k in keys:
+            xw = x_arrays[k][sl]
+            s = np.std(xw)
+            if s == 0:
+                skip = True
+                break
+            x_win_z[k] = (xw - np.mean(xw)) / s
+        if skip:
+            continue
+
+        y_z = (y_win - np.mean(y_win)) / y_std
+        X_win = np.column_stack([np.ones(window)] + [x_win_z[k] for k in keys])
+        coef, r_squared = ols_with_r2(X_win, y_z)
+
         row = {"date": diff_dates[i - 1], "r_squared": r_squared}
         for j, r in enumerate(REGRESSORS):
-            row[f"beta_{r['id']}"] = float(coef[j + 1])
+            # 표준화 베타: 이 regressor가 1 SD 움직일 때 종속변수가 몇 SD 움직이는가.
+            # bp/%p/log_chg 등 원 단위가 달라도 항상 비교 가능하다.
+            row[f"std_beta_{r['id']}"] = float(coef[j + 1])
             row[f"corr_{r['id']}"] = pearson(y_win, x_arrays[r["id"]][sl])
         results.append(row)
     return results
