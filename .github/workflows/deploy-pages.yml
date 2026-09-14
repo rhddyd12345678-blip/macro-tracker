@@ -1,0 +1,53 @@
+name: Deploy Pages
+
+# report/ 하나만 Pages 아티팩트로 올린다. 브랜치 기반 Pages(루트 또는 /docs)는
+# report/ 파일들을 옮기거나 심볼릭링크해야 해서, 그 대신 Actions 기반 배포로
+# report/ 디렉터리를 그대로 아티팩트 루트로 올린다 - 위치 제약이 없다.
+#
+# 두 가지 트리거가 모두 필요하다:
+#   - push(report/** 변경): 사람이 report/를 직접 고쳐 push할 때 (이 세션에서
+#     해온 방식). 이때 push는 사용자 자격증명이라 정상적으로 워크플로를 깨운다.
+#   - workflow_run(Daily ETL 완료 후): daily-etl.yml의 자동 커밋은 기본
+#     GITHUB_TOKEN으로 push되는데, GITHUB_TOKEN이 만든 push는 다른 워크플로의
+#     push 트리거를 깨우지 않는다(무한루프 방지용 GitHub 정책). workflow_run은
+#     이 제약을 받지 않으므로 자동 데이터 갱신 뒤 배포가 안 되는 문제를 피한다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "report/**"
+  workflow_run:
+    workflows: ["Daily ETL"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/configure-pages@v5
+
+      - name: Upload report/ as Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: report
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
