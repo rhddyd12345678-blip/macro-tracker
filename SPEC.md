@@ -20,7 +20,7 @@
 
 ---
 
-## 2. 4사분면 정의
+## 2. 정책 반응 상태 정의 (5구간)
 
 ```
                     매파 (Y+)
@@ -28,8 +28,8 @@
         매파적 인하 ●  │  ● 매파적 인상
                        │
    인하 ──────────────┼────────────── 인상  (X)
-                       │
-      비둘기적 인하 ●  │  ● 비둘기적 인상
+                       │  ← 동결(hold)은 이 세로축(X=0) 위의
+      비둘기적 인하 ●  │  ● 비둘기적 인상     점 하나로, 톤 세분류 없음
                        │
                     비둘기 (Y-)
 ```
@@ -37,29 +37,38 @@
 - **X축 = 실제 정책 액션.** 해당 회의의 기준금리 변화(bp)
 - **Y축 = 시장 기대 대비 톤.** 시장에 이미 내재된 경로보다 매파적인가
 
-두 축을 "인상/인하" × "매파/비둘기"로 잡으면 사실상 같은 축이라 사분면
-2개가 빈다. 시장이 크게 움직이는 것은 오프대각선(hawkish cut, dovish hike)이다.
+두 축을 "인상/인하" × "매파/비둘기"로만 잡으면 사실상 같은 축이라 사분면
+2개가 비고, **동결(hold)이 들어갈 자리가 아예 없어진다.** 그래서 동결은
+별도의 5번째 상태로 분리하고, 톤(매파/비둘기) 세분류를 하지 않는다 —
+동결 회의에서 2년물이 크게 튀는 경우는 드물고, 튀더라도 "동결+톤"까지
+구분할 실익이 적기 때문이다. 시장이 크게 움직이는 것은 인상/인하 쪽
+오프대각선(hawkish cut, dovish hike)이다.
 
 ### 판정 규칙 (자동 채점용)
 
-| 축 | 조건 | 라벨 |
-|---|---|---|
-| X | Δ정책금리 > 0 | 인상 |
-| X | Δ정책금리 = 0 | 동결 |
-| X | Δ정책금리 < 0 | 인하 |
-| Y | 회의 직후 2Y 변화 > +5bp | 매파 |
-| Y | −5bp ~ +5bp | 중립 |
-| Y | < −5bp | 비둘기 |
+| 상태 | 조건 |
+|---|---|
+| `hike_hawk` (매파적 인상) | Δ정책금리 > 0 **그리고** 회의 직후 2Y 변화 > +5bp |
+| `hike_dove` (비둘기적 인상) | Δ정책금리 > 0 **그리고** 2Y 변화 ≤ +5bp (중립·비둘기 포함) |
+| `hold` (동결) | Δ정책금리 = 0 |
+| `cut_hawk` (매파적 인하) | Δ정책금리 < 0 **그리고** 2Y 변화 > +5bp |
+| `cut_dove` (비둘기적 인하) | Δ정책금리 < 0 **그리고** 2Y 변화 ≤ +5bp (중립·비둘기 포함) |
 
 Y축 판정에 "성명서 느낌" 대신 **회의 직후 2년물 반응 bp**를 쓰면 완전 자동
 채점이 된다. 시장이 매파로 받았는지는 가격이 말해준다. 문구 해석(LLM 톤
 스코어)은 별도 컬럼에 참고값으로만 병행한다.
 
+> **확인 필요 (미해결):** 위 표는 "2Y 변화 ≤ +5bp"를 전부 비둘기 쪽으로
+> 묶었다 — 원래 있던 −5bp~+5bp "중립" 구간을 인상/인하와 결합할 때
+> 매파/비둘기 어느 쪽에 넣을지 SPEC에 정의가 없었기 때문에, 우선
+> 비둘기 쪽으로 편입시켜 5구간을 빠짐없이 정의했다. 실제 데이터로
+> "중립" 사례가 얼마나 나오는지 보고 재검토할 것.
+
 ---
 
 ## 3. 지표 마스터
 
-`config/indicators.csv` — 64개. `etl/build_indicators.py` 로 생성되며
+`config/indicators.csv` — 66개. `etl/build_indicators.py` 로 생성되며
 `hawkish_sign` / `weight` / `review_flag` 는 `etl/signs.py` 규칙에서 자동 산출.
 **CSV의 부호를 손으로 고치지 말 것.** 규칙을 고치고 재생성한다.
 
@@ -69,12 +78,14 @@ Y축 판정에 "성명서 느낌" 대신 **회의 직후 2년물 반응 bp**를 
 |---|---|
 | `id` | 고유 id. 반드시 문자로 시작 (엑셀이 `2Y`를 날짜로 바꾸는 것 방지) |
 | `category` | 부호 결정의 근거. `labor_level` / `labor_slack` 분리가 핵심 |
+| `source_id` | 소스별 시계열/통계표 코드 |
+| `item_code` | ECOS처럼 하나의 통계표(`source_id`)가 여러 시계열을 담는 경우의 하위 항목코드. 다른 소스는 빈 값 |
 | `target_cb` | 어느 중앙은행의 판단 대상인가 (FED/BOK/ECB/BOJ/NONE) |
 | `use_as` | 아래 4종 |
 | `hawkish_sign` | +1 긴축 / −1 완화 / 0 집계제외 |
 | `weight` | 1.0 초과는 연준이 명시 타깃하는 변수에만 |
 | `review_flag` | `SLACK` / `ZERO` / `HIGHW` — 여기만 검토하면 됨 |
-| `id_verified` | `N` 이면 첫 ETL 전 source_id 실측 확인 필요 |
+| `id_verified` | `N` 이면 첫 ETL 전 source_id(+item_code) 실측 확인 필요 |
 
 ### use_as
 
@@ -83,7 +94,7 @@ Y축 판정에 "성명서 느낌" 대신 **회의 직후 2년물 반응 bp**를 
 | `policy_input` | 43 | 매파 스코어 집계에 들어감 |
 | `market_baseline` | 7 | 시장 컨센서스. 내 예측의 경쟁자 |
 | `kr_link_input` | 10 | 한국 금리 링크 회귀의 설명변수 |
-| `outcome` | 4 | 결과 변수. 사후 채점용 |
+| `outcome` | 6 | 결과 변수. 사후 채점용 (ECB는 DFR/MRO 2종) |
 
 ### 매파 스코어 산식
 
@@ -126,18 +137,21 @@ CREATE TABLE forecasts (
   id SERIAL PRIMARY KEY,
   meeting_date DATE, forecast_date DATE,
   q_hike_hawk NUMERIC, q_hike_dove NUMERIC,
-  q_cut_hawk  NUMERIC, q_cut_dove  NUMERIC,   -- 합 100
+  q_hold      NUMERIC,
+  q_cut_hawk  NUMERIC, q_cut_dove  NUMERIC,   -- 5구간 합 100
   rationale TEXT,
   key_indicators TEXT[],
   position_plan JSONB,
-  actual_quadrant TEXT, brier_score NUMERIC
+  actual_state TEXT, brier_score NUMERIC     -- actual_state: hike_hawk/hike_dove/hold/cut_hawk/cut_dove 중 하나
 );
 
 -- 시장 = 경쟁자
 CREATE TABLE market_baseline (
   meeting_date DATE,
   snapshot_date DATE,          -- 궤적이 남아야 "그때 시장은?"을 볼 수 있음
-  hike_prob NUMERIC, hold_prob NUMERIC, cut_prob NUMERIC,
+  hike_prob NUMERIC, hold_prob NUMERIC, cut_prob NUMERIC,  -- X축 원자료 (OIS 등에서 직접 조달)
+  p_hike_hawk NUMERIC, p_hike_dove NUMERIC,
+  p_cut_hawk  NUMERIC, p_cut_dove  NUMERIC,                -- 5구간 환산치. hold_prob과 합쳐 100
   ust2y NUMERIC,
   implied_hawkish_z NUMERIC,
   brier_score NUMERIC,
@@ -151,8 +165,16 @@ CREATE TABLE market_baseline (
 ### 채점
 
 ```
-Brier = Σ(p_i − o_i)² / N        (o_i: 실제 발생 1, 아니면 0)
+Brier = Σ(p_i − o_i)² / N        (o_i: 실제 발생 1, 아니면 0; N=5, 2번 §2의 5구간)
 ```
+
+**나와 시장의 Brier를 같은 5구간 라벨(hike_hawk/hike_dove/hold/cut_hawk/cut_dove)
+위에서 계산해야 비교가 성립한다.** `market_baseline`이 원래 갖고 있던
+`hike_prob/hold_prob/cut_prob`은 X축(3지선다)만 담고 톤(Y축) 분해가 없어서,
+내 4~5구간 확률과 축이 달라 그대로는 뺄셈이 의미가 없었다. `p_hike_hawk` 등
+4개 컬럼을 추가해 시장 쪽도 같은 5구간으로 맞춘다. **단, 시장의 hike_prob/
+cut_prob을 hawk/dove로 쪼개는 산출 방법 자체는 아직 미정 — §7 확인 필요
+항목 참고.**
 
 6개월 쌓이면 캘리브레이션 곡선으로 본인 편향(예: 매파 과대평가)이 보인다.
 **누적 Brier(나) − Brier(시장) 이 어느 국면에서 양수인지**가 핵심 지표다.
@@ -190,11 +212,12 @@ GitHub Actions (평일 UTC 22:00 = KST 익일 07:00)
 
 | # | 항목 | 비고 |
 |---|---|---|
-| 1 | `id_verified = N` 인 34개 source_id 실측 | ECOS/ECB/e-Stat/BOJ 코드. **FRED 30개는 확인됨** |
+| 1 | `id_verified = N` 인 36개 source_id(+item_code) 실측 | ECOS/ECB/e-Stat/BOJ 코드. **FRED 30개는 확인됨.** ECOS 계열(`kr_*`)은 `source_id` 하나가 여러 시계열을 담는 통계표라 `item_code`까지 확인해야 함 — ECOS Open API 키 발급 후 `StatisticItemList`로 조회 예정. `ea_dfr`/`ea_mro`는 ECB SDW 시리즈 키(`FM.D.U2.EUR.4F.KR.DFR.LEV`, `FM.D.U2.EUR.4F.KR.MRR_FR.LEV`)를 웹 검색으로만 확인했고 실제 fetch 테스트는 아직 안 함 |
 | 2 | 컨센서스 조달 경로 | 무료 API 없음. 과거 백필 포기하고 오늘부터 수집 권장 |
 | 3 | ISM / S&P PMI | 라이선스 문제로 FRED 미제공. 수동 또는 크롤링 |
 | 4 | BDI / SCFI | 무료 API 사실상 없음. 실패 허용 설계 필수 |
 | 5 | `review_flag` 10건 검토 | 아래 |
+| 6 | 시장의 5구간 톤(hawk/dove) 확률 산출 방법 | `market_baseline.p_hike_hawk` 등 4개 컬럼(§4)의 계산식 미정. OIS 내재 경로 스큐, 옵션 내재분포 등 후보 중 결정 필요. 4주차 전 확정 |
 
 ### review_flag 10건
 
@@ -213,7 +236,7 @@ GitHub Actions (평일 UTC 22:00 = KST 익일 07:00)
 | 4 | 4사분면 입력 폼 + Brier 스코어보드 (나 vs 시장) |
 | 이후 | BDI 등 크롤링 소스, LLM 톤 스코어 |
 
-스택: Next.js + Postgres(또는 SQLite) + Python ETL(GitHub Actions).
+스택: Next.js + SQLite(1주차 시작, 추후 Postgres 전환 가능) + Python ETL(GitHub Actions).
 
 ---
 
