@@ -225,6 +225,20 @@ def get_unscored_forecasts(conn):
     return [dict(zip(FORECAST_COLUMNS, row)) for row in cur.fetchall()]
 
 
+def get_forecasts_for_meeting(conn, meeting_date):
+    cur = conn.execute(
+        f"SELECT {', '.join(FORECAST_COLUMNS)} FROM forecasts "
+        f"WHERE meeting_date = ? ORDER BY forecast_date",
+        (meeting_date,),
+    )
+    return [dict(zip(FORECAST_COLUMNS, row)) for row in cur.fetchall()]
+
+
+def delete_forecast(conn, forecast_id):
+    conn.execute("DELETE FROM forecasts WHERE id = ?", (forecast_id,))
+    conn.commit()
+
+
 def update_forecast_score(conn, forecast_id, actual_state, brier_score):
     conn.execute(
         "UPDATE forecasts SET actual_state = ?, brier_score = ? WHERE id = ?",
