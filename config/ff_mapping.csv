@@ -1,0 +1,16 @@
+indicator_id,ff_title
+us_nfp,Non-Farm Employment Change
+us_unrate,Unemployment Rate
+us_iclaims,Unemployment Claims
+us_cclaims,Continuing Claims
+us_cpi,CPI y/y
+us_core_cpi,Core CPI y/y
+us_ppi,PPI y/y
+us_core_pce,Core PCE Price Index y/y
+us_pce,PCE Price Index y/y
+us_umich_inflexp,Final UoM Inflation Expectations
+us_jolts,JOLTS Job Openings
+us_indpro,Industrial Production m/m
+us_durable,Durable Goods Orders m/m
+us_gdp_adv,Advance GDP q/q
+us_fftr_upper,Federal Funds Rate

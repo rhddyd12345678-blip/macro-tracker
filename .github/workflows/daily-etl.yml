@@ -1,0 +1,65 @@
+name: Daily ETL
+
+on:
+  schedule:
+    # 평일 UTC 22:00 = KST 익일 07:00
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+    env:
+      FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+      ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch FRED
+        id: fred
+        continue-on-error: true
+        run: python etl/fetch_fred.py
+
+      - name: Fetch ECOS
+        id: ecos
+        continue-on-error: true
+        run: python etl/fetch_ecos.py
+
+      - name: Fetch economic calendar consensus
+        id: calendar
+        continue-on-error: true
+        run: python etl/fetch_calendar.py
+
+      - name: Rebuild chart data
+        run: python report/build_chart.py
+
+      - name: Commit and push updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/macro.db report/data.json
+          if git diff --cached --quiet; then
+            echo "변경 사항 없음 - 커밋 생략"
+          else
+            git commit -m "Automated data update: $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Fail workflow if any collector had a catastrophic failure
+        if: |
+          steps.fred.outcome == 'failure' ||
+          steps.ecos.outcome == 'failure' ||
+          steps.calendar.outcome == 'failure'
+        run: |
+          echo "하나 이상의 수집기가 완전히 실패했습니다 (개별 지표 실패가 아니라 전체 실패). 로그를 확인하세요."
+          exit 1
