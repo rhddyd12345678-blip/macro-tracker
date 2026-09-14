@@ -9,6 +9,8 @@ signs.py 규칙에 따라 자동으로 다시 계산된다. 부호를 손으로 
 id            고유 id. 반드시 문자로 시작 (엑셀이 2Y 를 날짜로 바꾸는 것 방지)
 item_code     source_id 하나가 여러 시계열을 담는 통계표(예: ECOS)일 때의
               하위 항목코드. 그 외 소스는 빈 문자열
+              ECOS는 ITEM_CODE1~4까지 계층을 가질 수 있어, 2단계 이상 필요하면
+              "/"로 이어붙인다 (예: kr_unrate "I61BC/I28B" = 실업률/계절조정)
 target_cb     이 지표가 어느 중앙은행의 판단 대상인가 (FED/BOK/ECB/BOJ/NONE)
 use_as        policy_input   -> 매파 스코어 집계에 들어감
               market_baseline-> 시장 컨센서스. 내 예측의 '경쟁자'
@@ -62,19 +64,19 @@ INDICATORS = [
     ("us_nfci",      "시카고연은 금융환경","US", "financial", "fred", "NFCI",         "", "W", "level",  "FED", "market_baseline", "Y"),
 
     # ================================================================== 한국
-    ("kr_cpi",          "한국 CPI",            "KR", "inflation",   "ecos", "901Y009", "", "M", "yoy",     "BOK", "policy_input",  "N"),
-    ("kr_core_cpi",     "한국 근원CPI",        "KR", "inflation",   "ecos", "901Y010", "", "M", "yoy",     "BOK", "policy_input",  "N"),
-    ("kr_export",       "수출(월간)",          "KR", "external",    "ecos", "403Y001", "", "M", "yoy",     "BOK", "policy_input",  "N"),
+    ("kr_cpi",          "한국 CPI",            "KR", "inflation",   "ecos", "901Y009", "0",         "M", "yoy",     "BOK", "policy_input",  "Y"),
+    ("kr_core_cpi",     "한국 근원CPI",        "KR", "inflation",   "ecos", "901Y010", "QB",        "M", "yoy",     "BOK", "policy_input",  "Y"),
+    ("kr_export",       "수출(월간)",          "KR", "external",    "ecos", "403Y001", "*AA",       "M", "yoy",     "BOK", "policy_input",  "Y"),
     ("kr_export_20d",   "관세청 1~20일 수출",  "KR", "external",    "customs", "EXPORT_20D", "", "M", "yoy", "BOK", "policy_input", "N"),
     ("kr_export_semi",  "반도체 수출",         "KR", "external",    "customs", "EXPORT_SEMI","", "M", "yoy", "BOK", "policy_input", "N"),
     ("kr_ip",           "산업생산",            "KR", "growth",      "kosis", "IP_SA",   "", "M", "mom_pct", "BOK", "policy_input",  "N"),
-    ("kr_unrate",       "한국 실업률",         "KR", "labor_slack", "ecos", "901Y027", "", "M", "level",   "BOK", "policy_input",  "N"),
-    ("kr_current_acct", "경상수지",            "KR", "external",    "ecos", "301Y017", "", "M", "level",   "BOK", "policy_input",  "N"),
-    ("kr_household_debt","가계신용 증감",      "KR", "credit"   ,   "ecos", "151Y001", "", "Q", "yoy",     "BOK", "policy_input",  "N"),
-    ("kr_house_price",  "주택매매가격지수",    "KR", "credit"   ,   "ecos", "901Y062", "", "M", "mom_pct", "BOK", "policy_input",  "N"),
-    ("kr_base_rate",    "한은 기준금리",       "KR", "policy",      "ecos", "722Y001", "", "D", "level",   "BOK", "outcome",       "N"),
-    ("kr_ktb3y",        "국고채 3년",          "KR", "financial",   "ecos", "817Y002", "", "D", "level",   "BOK", "kr_link_input", "N"),
-    ("kr_ktb10y",       "국고채 10년",         "KR", "financial",   "ecos", "817Y002", "", "D", "level",   "BOK", "kr_link_input", "N"),
+    ("kr_unrate",       "한국 실업률",         "KR", "labor_slack", "ecos", "901Y027", "I61BC/I28B","M", "level",   "BOK", "policy_input",  "Y"),
+    ("kr_current_acct", "경상수지",            "KR", "external",    "ecos", "301Y017", "SA000",     "M", "level",   "BOK", "policy_input",  "Y"),
+    ("kr_household_debt","가계신용 증감",      "KR", "credit"   ,   "ecos", "151Y001", "1000000",   "Q", "yoy",     "BOK", "policy_input",  "Y"),
+    ("kr_house_price",  "주택매매가격지수",    "KR", "credit"   ,   "ecos", "901Y062", "P63A",      "M", "mom_pct", "BOK", "policy_input",  "Y"),
+    ("kr_base_rate",    "한은 기준금리",       "KR", "policy",      "ecos", "722Y001", "0101000",   "D", "level",   "BOK", "outcome",       "Y"),
+    ("kr_ktb3y",        "국고채 3년",          "KR", "financial",   "ecos", "817Y002", "010200000", "D", "level",   "BOK", "kr_link_input", "Y"),
+    ("kr_ktb10y",       "국고채 10년",         "KR", "financial",   "ecos", "817Y002", "010210000", "D", "level",   "BOK", "kr_link_input", "Y"),
 
     # ================================================================ 유로존
     ("ea_hicp",      "HICP",             "EA", "inflation", "ecb",  "ICP.M.U2.N.000000.4.ANR",             "", "M", "level", "ECB", "policy_input",  "N"),

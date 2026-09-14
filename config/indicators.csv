@@ -27,19 +27,19 @@ us_10y,미 국채 10년,US,financial,fred,DGS10,,D,level,FED,market_baseline,0,0
 us_2s10s,2s10s 스프레드,US,financial,fred,T10Y2Y,,D,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
 us_hy_oas,하이일드 OAS,US,financial,fred,BAMLH0A0HYM2,,D,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
 us_nfci,시카고연은 금융환경,US,financial,fred,NFCI,,W,level,FED,market_baseline,0,0.0,[market_baseline] 매파 스코어 집계 제외,,Y
-kr_cpi,한국 CPI,KR,inflation,ecos,901Y009,,M,yoy,BOK,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
-kr_core_cpi,한국 근원CPI,KR,inflation,ecos,901Y010,,M,yoy,BOK,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
-kr_export,수출(월간),KR,external,ecos,403Y001,,M,yoy,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
+kr_cpi,한국 CPI,KR,inflation,ecos,901Y009,0,M,yoy,BOK,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,Y
+kr_core_cpi,한국 근원CPI,KR,inflation,ecos,901Y010,QB,M,yoy,BOK,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,Y
+kr_export,수출(월간),KR,external,ecos,403Y001,*AA,M,yoy,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,Y
 kr_export_20d,관세청 1~20일 수출,KR,external,customs,EXPORT_20D,,M,yoy,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
 kr_export_semi,반도체 수출,KR,external,customs,EXPORT_SEMI,,M,yoy,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
 kr_ip,산업생산,KR,growth,kosis,IP_SA,,M,mom_pct,BOK,policy_input,1,0.7,[growth] 값 상회 = 긴축 방향,,N
-kr_unrate,한국 실업률,KR,labor_slack,ecos,901Y027,,M,level,BOK,policy_input,-1,0.8,[labor_slack] 값 상회 = 완화 방향,SLACK,N
-kr_current_acct,경상수지,KR,external,ecos,301Y017,,M,level,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,N
-kr_household_debt,가계신용 증감,KR,credit,ecos,151Y001,,Q,yoy,BOK,policy_input,1,0.6,[credit] 값 상회 = 긴축 방향,,N
-kr_house_price,주택매매가격지수,KR,credit,ecos,901Y062,,M,mom_pct,BOK,policy_input,1,0.6,[credit] 값 상회 = 긴축 방향,,N
-kr_base_rate,한은 기준금리,KR,policy,ecos,722Y001,,D,level,BOK,outcome,0,0.0,[outcome] 매파 스코어 집계 제외,,N
-kr_ktb3y,국고채 3년,KR,financial,ecos,817Y002,,D,level,BOK,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
-kr_ktb10y,국고채 10년,KR,financial,ecos,817Y002,,D,level,BOK,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,N
+kr_unrate,한국 실업률,KR,labor_slack,ecos,901Y027,I61BC/I28B,M,level,BOK,policy_input,-1,0.8,[labor_slack] 값 상회 = 완화 방향,SLACK,Y
+kr_current_acct,경상수지,KR,external,ecos,301Y017,SA000,M,level,BOK,policy_input,1,0.5,[external] 값 상회 = 긴축 방향,,Y
+kr_household_debt,가계신용 증감,KR,credit,ecos,151Y001,1000000,Q,yoy,BOK,policy_input,1,0.6,[credit] 값 상회 = 긴축 방향,,Y
+kr_house_price,주택매매가격지수,KR,credit,ecos,901Y062,P63A,M,mom_pct,BOK,policy_input,1,0.6,[credit] 값 상회 = 긴축 방향,,Y
+kr_base_rate,한은 기준금리,KR,policy,ecos,722Y001,0101000,D,level,BOK,outcome,0,0.0,[outcome] 매파 스코어 집계 제외,,Y
+kr_ktb3y,국고채 3년,KR,financial,ecos,817Y002,010200000,D,level,BOK,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,Y
+kr_ktb10y,국고채 10년,KR,financial,ecos,817Y002,010210000,D,level,BOK,kr_link_input,0,0.0,[kr_link_input] 매파 스코어 집계 제외,,Y
 ea_hicp,HICP,EA,inflation,ecb,ICP.M.U2.N.000000.4.ANR,,M,level,ECB,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
 ea_core_hicp,근원 HICP,EA,inflation,ecb,ICP.M.U2.N.XEF000.4.ANR,,M,level,ECB,policy_input,1,1.0,[inflation] 값 상회 = 긴축 방향,,N
 ea_wages,협상임금,EA,labor_level,ecb,ECB_NEGOTIATED_WAGES,,Q,yoy,ECB,policy_input,1,0.8,[labor_level] 값 상회 = 긴축 방향,,N
