@@ -2,22 +2,6 @@
   "policy_rate": {
     "us_fftr_upper": [
       {
-        "date": "2021-10-09",
-        "value": 0.25
-      },
-      {
-        "date": "2021-10-10",
-        "value": 0.25
-      },
-      {
-        "date": "2021-10-11",
-        "value": 0.25
-      },
-      {
-        "date": "2021-10-12",
-        "value": 0.25
-      },
-      {
         "date": "2021-10-13",
         "value": 0.25
       },
@@ -7308,13 +7292,21 @@
       {
         "date": "2026-10-09",
         "value": 4.0
+      },
+      {
+        "date": "2026-10-10",
+        "value": 4.0
+      },
+      {
+        "date": "2026-10-11",
+        "value": 4.0
+      },
+      {
+        "date": "2026-10-12",
+        "value": 4.0
       }
     ],
     "us_effr": [
-      {
-        "date": "2021-10-12",
-        "value": 0.08
-      },
       {
         "date": "2021-10-13",
         "value": 0.08
@@ -12328,10 +12320,6 @@
   "yields": {
     "us_2y": [
       {
-        "date": "2021-10-12",
-        "value": 0.35
-      },
-      {
         "date": "2021-10-13",
         "value": 0.37
       },
@@ -17321,10 +17309,6 @@
       }
     ],
     "us_10y": [
-      {
-        "date": "2021-10-12",
-        "value": 1.59
-      },
       {
         "date": "2021-10-13",
         "value": 1.56
@@ -41490,16 +41474,48 @@
     "note": "target_cb=FED 且 use_as=policy_input만 집계. 발표(actual+consensus 확보)가 없는 주는 시계열에서 제외 (0점으로 채우면 '중립'과 '데이터 없음'이 구분 안 됨). z_method='raw'인 값은 표본 부족으로 surprise_z 대신 raw surprise를 그대로 쓴 것 - 참고용으로만 볼 것."
   },
   "current_week": {
-    "week_start": "2026-10-05",
-    "week_end": "2026-10-11",
+    "week_start": "2026-10-12",
+    "week_end": "2026-10-18",
     "rows": [
+      {
+        "indicator_id": "us_core_cpi",
+        "label": "근원 CPI",
+        "release_ts": "2026-10-14T08:30:00-04:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 2.5,
+        "previous": 2.4,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": 1,
+        "weight": 1.3,
+        "contribution": null
+      },
+      {
+        "indicator_id": "us_cpi",
+        "label": "CPI",
+        "release_ts": "2026-10-14T08:30:00-04:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 3.6,
+        "previous": 3.4,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": 1,
+        "weight": 1.0,
+        "contribution": null
+      },
       {
         "indicator_id": "us_iclaims",
         "label": "신규 실업수당청구",
-        "release_ts": "2026-10-08T08:30:00-04:00",
+        "release_ts": "2026-10-15T08:30:00-04:00",
         "status": "pending",
         "actual": null,
-        "consensus": 200000.0,
+        "consensus": 199000.0,
         "previous": 197000.0,
         "surprise": null,
         "surprise_z": null,
@@ -41510,19 +41526,19 @@
         "contribution": null
       },
       {
-        "indicator_id": "us_iclaims",
-        "label": "신규 실업수당청구",
-        "release_ts": "2026-10-08T08:30:00-04:00",
+        "indicator_id": "us_indpro",
+        "label": "산업생산",
+        "release_ts": "2026-10-16T09:15:00-04:00",
         "status": "pending",
         "actual": null,
-        "consensus": 200000.0,
-        "previous": 197000.0,
+        "consensus": 0.4,
+        "previous": 0.0,
         "surprise": null,
         "surprise_z": null,
         "z_method": null,
         "z_sample_n": null,
-        "hawkish_sign": -1,
-        "weight": 0.6,
+        "hawkish_sign": 1,
+        "weight": 0.7,
         "contribution": null
       }
     ]
@@ -41544,7 +41560,7 @@
     "next_meeting": {
       "meeting_date": "2026-10-28",
       "has_sep": false,
-      "days_until": 19
+      "days_until": 15
     },
     "note": "market_baseline은 아직 무료 수집 소스가 없어 비어있음 - 값이 채워지면 자동으로 나 vs 시장 비교에 반영됨. 캘리브레이션 곡선은 표본이 30개(예측 6건) 미만이면 표시 안 함."
   }
