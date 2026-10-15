@@ -2,10 +2,6 @@
   "policy_rate": {
     "us_fftr_upper": [
       {
-        "date": "2021-10-14",
-        "value": 0.25
-      },
-      {
         "date": "2021-10-15",
         "value": 0.25
       },
@@ -7304,13 +7300,13 @@
       {
         "date": "2026-10-13",
         "value": 4.0
+      },
+      {
+        "date": "2026-10-14",
+        "value": 4.0
       }
     ],
     "us_effr": [
-      {
-        "date": "2021-10-14",
-        "value": 0.08
-      },
       {
         "date": "2021-10-15",
         "value": 0.08
@@ -12314,15 +12310,15 @@
       {
         "date": "2026-10-09",
         "value": 3.88
+      },
+      {
+        "date": "2026-10-13",
+        "value": 3.88
       }
     ]
   },
   "yields": {
     "us_2y": [
-      {
-        "date": "2021-10-14",
-        "value": 0.36
-      },
       {
         "date": "2021-10-15",
         "value": 0.41
@@ -17306,13 +17302,13 @@
       {
         "date": "2026-10-09",
         "value": 4.8
+      },
+      {
+        "date": "2026-10-13",
+        "value": 4.79
       }
     ],
     "us_10y": [
-      {
-        "date": "2021-10-14",
-        "value": 1.52
-      },
       {
         "date": "2021-10-15",
         "value": 1.59
@@ -22296,6 +22292,10 @@
       {
         "date": "2026-10-09",
         "value": 5.24
+      },
+      {
+        "date": "2026-10-13",
+        "value": 5.21
       }
     ]
   },
@@ -41494,6 +41494,38 @@
         "contribution": null
       },
       {
+        "indicator_id": "us_core_cpi",
+        "label": "근원 CPI",
+        "release_ts": "2026-10-14T08:30:00-04:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 2.5,
+        "previous": 2.4,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": 1,
+        "weight": 1.3,
+        "contribution": null
+      },
+      {
+        "indicator_id": "us_cpi",
+        "label": "CPI",
+        "release_ts": "2026-10-14T08:30:00-04:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 3.6,
+        "previous": 3.4,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": 1,
+        "weight": 1.0,
+        "contribution": null
+      },
+      {
         "indicator_id": "us_cpi",
         "label": "CPI",
         "release_ts": "2026-10-14T08:30:00-04:00",
@@ -41560,7 +41592,7 @@
     "next_meeting": {
       "meeting_date": "2026-10-28",
       "has_sep": false,
-      "days_until": 14
+      "days_until": 13
     },
     "note": "market_baseline은 아직 무료 수집 소스가 없어 비어있음 - 값이 채워지면 자동으로 나 vs 시장 비교에 반영됨. 캘리브레이션 곡선은 표본이 30개(예측 6건) 미만이면 표시 안 함."
   }
