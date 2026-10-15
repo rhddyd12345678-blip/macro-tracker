@@ -7304,6 +7304,10 @@
       {
         "date": "2026-10-14",
         "value": 4.0
+      },
+      {
+        "date": "2026-10-15",
+        "value": 4.0
       }
     ],
     "us_effr": [
@@ -12314,6 +12318,10 @@
       {
         "date": "2026-10-13",
         "value": 3.88
+      },
+      {
+        "date": "2026-10-14",
+        "value": 3.88
       }
     ]
   },
@@ -17306,6 +17314,10 @@
       {
         "date": "2026-10-13",
         "value": 4.79
+      },
+      {
+        "date": "2026-10-14",
+        "value": 4.82
       }
     ],
     "us_10y": [
@@ -22296,6 +22308,10 @@
       {
         "date": "2026-10-13",
         "value": 5.21
+      },
+      {
+        "date": "2026-10-14",
+        "value": 5.19
       }
     ]
   },
@@ -41539,6 +41555,22 @@
         "z_sample_n": null,
         "hawkish_sign": 1,
         "weight": 1.0,
+        "contribution": null
+      },
+      {
+        "indicator_id": "us_iclaims",
+        "label": "신규 실업수당청구",
+        "release_ts": "2026-10-15T08:30:00-04:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 199000.0,
+        "previous": 197000.0,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": -1,
+        "weight": 0.6,
         "contribution": null
       },
       {
