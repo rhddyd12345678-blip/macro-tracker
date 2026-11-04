@@ -2,10 +2,6 @@
   "policy_rate": {
     "us_fftr_upper": [
       {
-        "date": "2021-11-03",
-        "value": 0.25
-      },
-      {
         "date": "2021-11-04",
         "value": 0.25
       },
@@ -7304,13 +7300,13 @@
       {
         "date": "2026-11-02",
         "value": 4.0
+      },
+      {
+        "date": "2026-11-03",
+        "value": 4.0
       }
     ],
     "us_effr": [
-      {
-        "date": "2021-11-03",
-        "value": 0.08
-      },
       {
         "date": "2021-11-04",
         "value": 0.08
@@ -12314,15 +12310,15 @@
       {
         "date": "2026-10-30",
         "value": 3.88
+      },
+      {
+        "date": "2026-11-02",
+        "value": 3.88
       }
     ]
   },
   "yields": {
     "us_2y": [
-      {
-        "date": "2021-11-03",
-        "value": 0.47
-      },
       {
         "date": "2021-11-04",
         "value": 0.41
@@ -17306,13 +17302,13 @@
       {
         "date": "2026-10-30",
         "value": 4.56
+      },
+      {
+        "date": "2026-11-02",
+        "value": 4.59
       }
     ],
     "us_10y": [
-      {
-        "date": "2021-11-03",
-        "value": 1.6
-      },
       {
         "date": "2021-11-04",
         "value": 1.53
@@ -22296,6 +22292,10 @@
       {
         "date": "2026-10-30",
         "value": 4.94
+      },
+      {
+        "date": "2026-11-02",
+        "value": 4.91
       }
     ]
   },
@@ -41478,6 +41478,22 @@
         "contribution": null
       },
       {
+        "indicator_id": "us_jolts",
+        "label": "JOLTS 구인건수",
+        "release_ts": "2026-11-03T10:00:00-05:00",
+        "status": "pending",
+        "actual": null,
+        "consensus": 7150000.0,
+        "previous": 7080000.0,
+        "surprise": null,
+        "surprise_z": null,
+        "z_method": null,
+        "z_sample_n": null,
+        "hawkish_sign": 1,
+        "weight": 0.8,
+        "contribution": null
+      },
+      {
         "indicator_id": "us_iclaims",
         "label": "신규 실업수당청구",
         "release_ts": "2026-11-05T08:30:00-05:00",
@@ -41544,7 +41560,7 @@
     "next_meeting": {
       "meeting_date": "2026-12-09",
       "has_sep": true,
-      "days_until": 36
+      "days_until": 35
     },
     "note": "market_baseline은 아직 무료 수집 소스가 없어 비어있음 - 값이 채워지면 자동으로 나 vs 시장 비교에 반영됨. 캘리브레이션 곡선은 표본이 30개(예측 6건) 미만이면 표시 안 함."
   }
